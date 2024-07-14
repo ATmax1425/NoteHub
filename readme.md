@@ -4,6 +4,8 @@ The complete SRS of the application is attached in the repository.
 
 # Setting up the project
 
+## Database Setup
+
 This project uses a potgres database running in a docker container.
 
 - Version : 16

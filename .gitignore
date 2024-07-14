@@ -1,2 +1,4 @@
 /venv
 /notehub/notehub/__pycache__
+/notehub/main/__pycache__
+/google-client-auth-token.json
