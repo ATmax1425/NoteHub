@@ -1,0 +1,49 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}
+Notehub
+{% endblock %}
+
+{% block body %}
+<style>
+    .full-height-container {
+        height: 100%;
+        background-image: url('{% static "background/background-index.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
+<div class="full-height-container">
+    <div class="centered-element" style="background: none;">
+        <form class="form" method="post" action="{% url 'register' %}">
+            {% for message in messages %}
+                <div class="alert alert-danger alert-{{message.extra_tags}} fade show text-dark m-0" role="alert">
+                    {{message}}
+                </div>
+            {% endfor %}
+            <h1 class="p-2">Sign Up</h1>
+            {% csrf_token %}
+            <div class="form-group p-2">
+                <input type="email" class="form-control" placeholder="Your Email Address..." name="username" required>
+            </div>
+            <div class="form-group p-2">
+                <input type="password" class="form-control" placeholder="Your Password..." name="password" required>
+            </div>
+            <div class="form-group p-2">
+                <button class="btn btn-dark" type="submit" style="width: 100%;">Sign Up</button>
+            </div>
+        </form>
+        <hr>
+        <div>
+            {% load socialaccount %}
+            <div class="form-group p-2">
+                <a class="btn btn-outline-dark" href="{% provider_login_url 'google' %}?next=/" style="width: 100%;"><i class="fa fa-google"></i> Sign Up with Google</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

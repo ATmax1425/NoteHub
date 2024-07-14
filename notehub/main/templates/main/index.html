@@ -6,26 +6,6 @@ Notehub
 {% endblock %}
 
 {% block body %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'index' %}">
-            <img src="{% static 'logo/logo.png' %}" width="32px" height="32px"> NoteHub
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link active" href="{% url 'login' %}">Sign In</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="{% url 'register' %}" style="border: 2px solid black;border-radius: 5px;">Sign In</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
 <style>
     .full-height-container {
         height: 100%;
@@ -38,7 +18,7 @@ Notehub
     }
 </style>
 <div class="full-height-container">
-    <div class="centered-element text-center">
+    <div class="centered-element">
         <h1>Want to study? then search...</h1>
         <div class="form">
             <div class="input-group mb-3">
@@ -49,8 +29,5 @@ Notehub
             </div>
         </div>
     </div>
-</div>
-<div class="container-fluid bg-light text-center pt-3">
-    <p>Designed and built with all the love in the world by the Pavan Jain</p>
 </div>
 {% endblock %}

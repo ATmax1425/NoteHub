@@ -2,6 +2,9 @@
 
 The complete SRS of the application is attached in the repository.
 
+Superuser : notes_repo 12345678
+
+
 # Setting up the project
 
 ## Database Setup
