@@ -23,5 +23,5 @@ Running the project
 
 - Create a superuser : python manage.py createsuperuser
 
-    `Username : note_repo`
+    `Username : notes_repo`
     `Password : 12345678`
