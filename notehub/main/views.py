@@ -7,6 +7,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib import messages
 from django.contrib.auth import authenticate as authenticate_user
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from .models import UserProfile
 
 def index(request):
@@ -16,12 +17,20 @@ def login(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
+        try:
+            user = User.objects.get(username=username)
+            if not user.has_usable_password():
+                messages.add_message(request, 40, f"Password is not set for {username}", extra_tags="warning")
+                return redirect('login')
+        except:
+            messages.add_message(request, 40, f"User with {username} does not exists!", extra_tags="danger")
+            return redirect('login')
         user = authenticate_user(request, username=username, password=password)
         if user:
             backend = 'django.contrib.auth.backends.ModelBackend'
             login_user(request, user, backend=backend)
             return redirect('index')
-        messages.add_message(request, 40, f"Invalid Username/Password", extra_tags="danger")
+        messages.add_message(request, 40, f"Invalid Password for {username}!", extra_tags="danger")
         return redirect('login')
     if request.user.is_authenticated:
         return redirect('index')
@@ -71,6 +80,23 @@ def upload_profile_image(request):
 
 def logout(request):
     logout_user(request)
+    return redirect('index')
+
+def set_pasword_for_social_account(request):
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        return render(request, 'main/set_password_social_account.html')
+    return redirect('index')
+
+@csrf_exempt
+def send_verification_code(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        try:
+            user = User.objects.get(email=email)
+            return JsonResponse({'message': f"Verification code is sent to {user.email} !", "success": True})
+        except:
+            return JsonResponse({'message': f"{email} is not a registered user email", "success": False})
     return redirect('index')
 
 @login_required
