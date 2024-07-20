@@ -1,14 +1,30 @@
+import os
+import json
+from os.path import join
 from datetime import datetime
-from django.http import JsonResponse
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django.contrib.auth import login as login_user, logout as logout_user
-from django.contrib.auth.hashers import make_password
+
+from django.conf import settings
+from django.core.cache import cache
+from django.core.mail import send_mail
 from django.contrib import messages
 from django.contrib.auth import authenticate as authenticate_user
+from django.contrib.auth import login as login_user, logout as logout_user
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import User
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
+
 from .models import UserProfile
+from .utils import generate_verification_code
+
+EMAIL_CONFIG_FILE = 'email_config.json'
+
+with open(join(settings.BASE_DIR, EMAIL_CONFIG_FILE)) as file:
+    EMAIL_CONFIG = json.load(file)
+    SENDER = EMAIL_CONFIG['EMAIL_HOST_USER']
+
 
 def index(request):
     return render(request, 'main/index.html')
@@ -94,9 +110,58 @@ def send_verification_code(request):
         email = request.POST['email']
         try:
             user = User.objects.get(email=email)
-            return JsonResponse({'message': f"Verification code is sent to {user.email} !", "success": True})
         except:
             return JsonResponse({'message': f"{email} is not a registered user email", "success": False})
+        # Generate code and send it to email
+        verification_code = generate_verification_code()
+        cache.set(f"verification_code:{user.email}", verification_code, timeout=300)
+        send_mail(
+            'Your Verification Code',
+            f'Your verification code is: {verification_code}',
+            SENDER,
+            [user.email],
+            fail_silently=False,
+        )
+        return JsonResponse({'message': f"Verification code is sent to {user.email} !", "success": True})
+    return redirect('index')
+
+@csrf_exempt
+def validate_verification_code(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        ver_code = request.POST['code']
+        try:
+            user = User.objects.get(email=email)
+        except:
+            return JsonResponse({'message': f"{email} is not a registered user email", "success": False})
+        code = cache.get(f"verification_code:{user.email}")
+        if not code:
+            return JsonResponse({'message': f"Entered verification code is expired!", "success": False})
+        elif code == ver_code:
+            return JsonResponse({'message': f"Your verification is successful!", "success": True})
+        else:
+            return JsonResponse({'message': f"Entered code is incorrect!", "success": False})
+    return redirect('index')
+
+def update_password(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        password1 = request.POST['password']
+        password2 = request.POST['cpassword']
+        if not (password1 == password2):
+            messages.add_message(request, 40, f"Passwords did not match!", extra_tags="danger")
+            return redirect('set-password')
+        try:
+            user = User.objects.get(email=email)
+        except:
+            messages.add_message(request, 40, f"User with {email} does not exits", extra_tags="danger")
+            return redirect('set-password')
+        hashed_password = make_password(password1)
+        user.password = hashed_password
+        user.save()
+        print('password-updated')
+        messages.add_message(request, 40, f"Password has been changed successfully!", extra_tags="success")
+        return redirect('login')
     return redirect('index')
 
 @login_required

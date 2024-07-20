@@ -5,3 +5,5 @@
 /google-client-auth-token.json
 /notehub/media
 /notehub/main/migrations/__pycache__
+/notehub/email_config.json
+/notehub/database_config.json

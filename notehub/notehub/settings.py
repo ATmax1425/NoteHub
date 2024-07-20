@@ -10,6 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 from pathlib import Path
+import os
+import json
+from os.path import join
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -91,17 +94,28 @@ WSGI_APPLICATION = 'notehub.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+DATABASE_CONFIG_FILE = 'database_config.json'
+
+with open(join(BASE_DIR, DATABASE_CONFIG_FILE)) as file:
+    DATABASE_CONFIG = json.load(file)
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'notehub',
-        'USER': 'postgres',
-        'PASSWORD': '12345678',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': DATABASE_CONFIG['ENGINE'],
+        'NAME': DATABASE_CONFIG['NAME'],
+        'USER': DATABASE_CONFIG['USER'],
+        'PASSWORD': DATABASE_CONFIG['PASSWORD'],
+        'HOST': DATABASE_CONFIG['HOST'],
+        'PORT': DATABASE_CONFIG['PORT']
     }
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379",
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -156,3 +170,15 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 SOCIALACCOUNT_ADAPTER  = 'main.adapters.CustomAccountAdapter'
+
+EMAIL_CONFIG_FILE = 'email_config.json'
+
+with open(join(BASE_DIR, EMAIL_CONFIG_FILE)) as file:
+    EMAIL_CONFIG = json.load(file)
+
+EMAIL_BACKEND = EMAIL_CONFIG['EMAIL_BACKEND']
+EMAIL_HOST = EMAIL_CONFIG['EMAIL_HOST']
+EMAIL_PORT = EMAIL_CONFIG['EMAIL_PORT']
+EMAIL_USE_TLS = EMAIL_CONFIG['EMAIL_USE_TLS']
+EMAIL_HOST_USER = EMAIL_CONFIG['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD = EMAIL_CONFIG['EMAIL_HOST_PASSWORD']
