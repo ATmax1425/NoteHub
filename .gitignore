@@ -7,3 +7,4 @@
 /notehub/main/migrations/__pycache__
 /notehub/email_config.json
 /notehub/database_config.json
+/notehub/google-drive-api-key.json

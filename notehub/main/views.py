@@ -1,11 +1,11 @@
 import os
 import json
+import uuid
 from os.path import join
 from datetime import datetime
 
 from django.conf import settings
 from django.core.cache import cache
-from django.core.mail import send_mail
 from django.contrib import messages
 from django.contrib.auth import authenticate as authenticate_user
 from django.contrib.auth import login as login_user, logout as logout_user
@@ -15,16 +15,10 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
+from django.core.files.storage import FileSystemStorage
 
 from .models import UserProfile
-from .utils import generate_verification_code
-
-EMAIL_CONFIG_FILE = 'email_config.json'
-
-with open(join(settings.BASE_DIR, EMAIL_CONFIG_FILE)) as file:
-    EMAIL_CONFIG = json.load(file)
-    SENDER = EMAIL_CONFIG['EMAIL_HOST_USER']
-
+from .utils import generate_verification_code, upload_to_drive, send_email
 
 def index(request):
     return render(request, 'main/index.html')
@@ -85,13 +79,26 @@ def register_int(request):
 def upload_profile_image(request):
     if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         try:
+            user = User.objects.get(id=request.user.id)
+        except:
+            return JsonResponse({'message': f"{request.user.email} is not a registered user email", "success": False})
+        random_id = str(uuid.uuid1())
+        image = request.FILES['profile_image']
+        fs = FileSystemStorage()
+        filename = fs.save(f"{random_id}_{image.name}", image)
+        file_path = fs.path(filename)
+        file_id = upload_to_drive(file_path, f"{random_id}_{image.name}")
+
+        profile_url = f"https://drive.google.com/file/d/{file_id}/view"
+        try:
             user_profile = UserProfile.objects.get(user=request.user)
-            user_profile.profile_image = request.FILES['profile_image']
+            user_profile.profile_url = profile_url
             user_profile.updated_at = datetime.now()
         except:
-            user_profile = UserProfile(user=request.user, profile_image=request.FILES['profile_image'], created_at = datetime.now(), updated_at=datetime.now())
+            user_profile = UserProfile(user=request.user, profile_url=profile_url, created_at = datetime.now(), updated_at=datetime.now())
         user_profile.save()
-        return JsonResponse({'message': 'File uploaded successfully!'}, status=201)
+
+        return JsonResponse({'message': 'File uploaded successfully!', 'success': True}, status=201)
     return redirect('index')
 
 def logout(request):
@@ -115,14 +122,16 @@ def send_verification_code(request):
         # Generate code and send it to email
         verification_code = generate_verification_code()
         cache.set(f"verification_code:{user.email}", verification_code, timeout=300)
-        send_mail(
-            'Your Verification Code',
-            f'Your verification code is: {verification_code}',
-            SENDER,
-            [user.email],
-            fail_silently=False,
-        )
-        return JsonResponse({'message': f"Verification code is sent to {user.email} !", "success": True})
+        subject = 'Welcome Onboard !'
+        template = 'welcome_and_verification_template.html'
+        recipient = [user.email]
+        metadata = {'user': user, 'ver_code': verification_code}
+        sent = send_email(recipient, subject, template, metadata)
+        if sent:
+            return JsonResponse({'message': f"Verification code is sent to {user.email} !", "success": True})
+        else:
+            return JsonResponse({'message': f"Some error ocurred while sending email to {user.email} !", "success": False})
+
     return redirect('index')
 
 @csrf_exempt
@@ -171,3 +180,6 @@ def profile(request):
 @login_required
 def feed(request):
     return redirect('index')
+
+def test_url(request):
+    return render(request, 'main/set_password_social_account.html')

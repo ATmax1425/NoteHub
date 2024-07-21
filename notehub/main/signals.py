@@ -3,6 +3,7 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User
 from .models import SocialUsersProfile, UserProfile
 from datetime import datetime
+from .utils import send_email
 
 @receiver(post_save, sender=User)
 def user_created_handler(sender, instance, created, **kwargs):
@@ -17,3 +18,8 @@ def user_created_handler(sender, instance, created, **kwargs):
         )
         user_profile_doc.save()
         social_user_profile_doc.delete()
+        recipient = [instance.email]
+        subject = 'Welcome Onboard !'
+        template = 'welcome_and_verification_template.html'
+        metadata = {'user': instance}
+        send_email(recipient, subject, template, metadata)

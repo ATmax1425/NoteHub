@@ -14,4 +14,5 @@ urlpatterns = [
     path('logout/', views.logout, name='logout'),
     path('profile/', views.profile, name='profile'),
     path('feed/', views.feed, name='feed'),
+    path('test/', views.test_url, name='test'),
 ]
