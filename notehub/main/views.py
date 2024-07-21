@@ -88,7 +88,7 @@ def upload_profile_image(request):
         filename = fs.save(f"{random_id}_{image.name}", image)
         file_path = fs.path(filename)
         file_id = upload_to_drive(file_path, f"{random_id}_{image.name}")
-
+        fs.delete(file_path)
         profile_url = f"https://drive.google.com/file/d/{file_id}/view"
         try:
             user_profile = UserProfile.objects.get(user=request.user)
@@ -180,6 +180,3 @@ def profile(request):
 @login_required
 def feed(request):
     return redirect('index')
-
-def test_url(request):
-    return render(request, 'main/set_password_social_account.html')
