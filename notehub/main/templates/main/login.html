@@ -1,5 +1,6 @@
 {% extends 'main/base.html' %}
 {% load static %}
+{% load main_filters %}
 
 {% block title %}
 Notehub
@@ -23,6 +24,9 @@ Notehub
             {% for message in messages %}
                 <div class="alert alert-danger alert-{{message.extra_tags}} fade show text-dark m-0" role="alert">
                     {{message}}
+                    {% if message|is_password_set_message %}
+                        Click <a href="{% url 'set-password' %}">here</a> to set a new password,
+                    {% endif %}
                 </div>
             {% endfor %}
             <h1 class="p-2">Sign In</h1>
