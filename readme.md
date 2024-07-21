@@ -27,5 +27,5 @@ This project uses a potgres database running in a docker container.
 
 - Create a superuser : python manage.py createsuperuser
 
-    `Username : notes_repo`
+    `Username : notesrepo.notehub@gmail.com`
     `Password : 12345678`
