@@ -5,8 +5,14 @@
 {% endblock %}
 
 {% block body %}
-    <p>Hello {{ user.first_name }} {{ user.last_name }}</p>
-    <p>Thank you for signing up for our service. We're excited to have you on board.</p>
+    <p>
+        Hello 
+        {% if user.first_name %}
+            {{user.first_name}} {{user.first_name}}
+        {% else %}
+            User
+        {% endif %}
+    </p>
     {% if ver_code %}
         <p>Your veification code is : <span style="font-size: 20px;font-weight: bold;">{{ver_code}}</span></p>
     {% endif %}

@@ -2,6 +2,8 @@ import os
 import json
 import random
 import string
+import base64
+import secrets
 from os.path import join
 
 from django.conf import settings
@@ -77,3 +79,16 @@ def send_email(recipients, subject, template, metadata):
     except Exception as exc:
         print('Error while sending the email', exc)
     return False
+
+def encode_with_random_salt(original_string):
+    encoded_bytes = base64.urlsafe_b64encode(original_string.encode())
+    encoded_string = encoded_bytes.decode()
+    salt = secrets.token_urlsafe(8)
+    random_encoded_string = f"{salt}{encoded_string}"
+    return random_encoded_string
+
+def decode_with_random_salt(encoded_string):
+    actual_encoded_string = encoded_string[11:]
+    decoded_bytes = base64.urlsafe_b64decode(actual_encoded_string.encode())
+    decoded_string = decoded_bytes.decode()
+    return decoded_string

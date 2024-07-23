@@ -36,6 +36,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+PROJECT_URL = 'http://localhost:8000'
 
 # Application definition
 

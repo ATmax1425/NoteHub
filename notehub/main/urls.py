@@ -9,6 +9,7 @@ urlpatterns = [
     path('register_int/', views.register_int, name='register-int'),
     path('set_password/', views.set_pasword_for_social_account, name='set-password'),
     path('send_code/', views.send_verification_code, name='send-code'),
+    path('<str:encoded_email>/verify/', views.verify_user, name='verify-user'),
     path('validate_code/', views.validate_verification_code, name='validate-code'),
     path('update_password/', views.update_password, name='update-password'),
     path('logout/', views.logout, name='logout'),

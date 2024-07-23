@@ -18,7 +18,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import FileSystemStorage
 
 from .models import UserProfile
-from .utils import generate_verification_code, upload_to_drive, send_email
+from .utils import generate_verification_code, upload_to_drive, send_email, decode_with_random_salt
+
+AUTH_BACKEND = 'django.contrib.auth.backends.ModelBackend'
 
 def index(request):
     return render(request, 'main/index.html')
@@ -37,8 +39,7 @@ def login(request):
             return redirect('login')
         user = authenticate_user(request, username=username, password=password)
         if user:
-            backend = 'django.contrib.auth.backends.ModelBackend'
-            login_user(request, user, backend=backend)
+            login_user(request, user, backend=AUTH_BACKEND)
             return redirect('index')
         messages.add_message(request, 40, f"Invalid Password for {username}!", extra_tags="danger")
         return redirect('login')
@@ -57,8 +58,7 @@ def register(request):
             pass
         password = make_password(request.POST['password'])
         user = User.objects.create(username=username, password=password, email=username)
-        backend = 'django.contrib.auth.backends.ModelBackend'
-        login_user(request, user, backend=backend)
+        login_user(request, user, backend=AUTH_BACKEND)
         return render(request, 'main/register_intermediate.html')
     if request.user.is_authenticated:
         return redirect('index')
@@ -121,9 +121,9 @@ def send_verification_code(request):
             return JsonResponse({'message': f"{email} is not a registered user email", "success": False})
         # Generate code and send it to email
         verification_code = generate_verification_code()
-        cache.set(f"verification_code:{user.email}", verification_code, timeout=300)
-        subject = 'Welcome Onboard !'
-        template = 'welcome_and_verification_template.html'
+        cache.set(f"verification_status:{user.email}", verification_code, timeout=300)
+        subject = 'Your verification code!'
+        template = 'verification_code.html'
         recipient = [user.email]
         metadata = {'user': user, 'ver_code': verification_code}
         sent = send_email(recipient, subject, template, metadata)
@@ -171,6 +171,23 @@ def update_password(request):
         print('password-updated')
         messages.add_message(request, 40, f"Password has been changed successfully!", extra_tags="success")
         return redirect('login')
+    return redirect('index')
+
+def verify_user(request, encoded_email):
+    email = decode_with_random_salt(encoded_email)
+    try:
+        user = User.objects.get(email=email)
+    except:
+        messages.add_message(request, 40, f"Something went wrong!", extra_tags="danger")
+        return redirect('index')
+    verified_status = cache.get(f"verification_status:{user.email}")
+    if verified_status:
+        if verified_status == 'pending':
+            cache.delete(f"verification_status:{user.email}")
+            messages.add_message(request, 40, f"User has been verified!", extra_tags="success")
+    else:
+        messages.add_message(request, 40, f"User is already verified!", extra_tags="success")
+    login_user(request, user, backend=AUTH_BACKEND)
     return redirect('index')
 
 @login_required
