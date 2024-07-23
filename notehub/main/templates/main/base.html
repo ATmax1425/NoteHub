@@ -58,6 +58,51 @@
                 </div>
             </div>
         </nav>
+        <div class="container-fluid bg-light p-0" style="font-weight: bold;">
+            <div class="row">
+                <div class="col-md-12">
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.extra_tags %}{{message.extra_tags}}{% else %}primary{% endif %} fade show m-0 p-0" role="alert" style="text-align: center;">
+                            {{message}}
+                            {% if message|is_password_set_message %}
+                                Click <a href="{% url 'set-password' %}">here</a> to set a new password,
+                            {% endif %}
+                        </div>
+                    {% endfor %}        
+                </div>
+            </div>
+        </div>
+        {% if user.is_authenticated %}
+            <div class="container-fluid bg-light p-0" style="font-weight: bold;">
+                <div class="row">
+                    <div class="col-md-12" id="account-verification-element">
+                        <script>
+                            $(document).ready(function() {
+                                $.ajax({
+                                    url: '{% url "user-verification-status" %}',
+                                    type: 'GET',
+                                    processData: false,
+                                    contentType: false,
+                                    success: function(response) {
+                                        if(response.success){
+                                            var newDiv = $('<div></div>').text('Account not verified yet, to resend verification email, click ');
+                                            newDiv.addClass('alert alert-secondary fade show m-0 p-0');
+                                            newDiv.css({'text-align': 'center'});
+                                            var newAnchor = $('<a></a>').attr('href', '{% url "resend-verification-email" %}').text('here');
+                                            newDiv.append(newAnchor);
+                                            $('#account-verification-element').append(newDiv);
+                                        }
+                                    },
+                                    error: function(response) {
+                                        alert('Error: ' + JSON.stringify(response.responseJSON.error));
+                                    }
+                                });
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
         {% block body %}
         {% endblock %}
         <div class="container-fluid bg-light text-center pt-3">

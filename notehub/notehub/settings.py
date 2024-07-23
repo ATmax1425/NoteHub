@@ -118,10 +118,16 @@ DATABASES = {
     }
 }
 
+CACHE_CONFIG_FILE = 'redis_config.json'
+
+with open(join(BASE_DIR, CACHE_CONFIG_FILE)) as file:
+    CACHE_CONFIG = json.load(file)
+
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379",
+        "BACKEND": CACHE_CONFIG['REDIS_BACKEND'],
+        "LOCATION": f"redis://{CACHE_CONFIG['REDIS_HOST']}:{CACHE_CONFIG['REDIS_PORT']}",
+        "TIMEOUT": CACHE_CONFIG['REDIS_TIMEOUT'],
     }
 }
 

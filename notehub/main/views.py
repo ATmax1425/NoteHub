@@ -18,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import FileSystemStorage
 
 from .models import UserProfile
-from .utils import generate_verification_code, upload_to_drive, send_email, decode_with_random_salt
+from .utils import generate_verification_code, upload_to_drive, send_email, decode_with_random_salt, send_verification_email
 
 AUTH_BACKEND = 'django.contrib.auth.backends.ModelBackend'
 
@@ -40,10 +40,12 @@ def login(request):
         user = authenticate_user(request, username=username, password=password)
         if user:
             login_user(request, user, backend=AUTH_BACKEND)
+            messages.add_message(request, 40, f"Logged In!", extra_tags="success")
             return redirect('index')
         messages.add_message(request, 40, f"Invalid Password for {username}!", extra_tags="danger")
         return redirect('login')
     if request.user.is_authenticated:
+        messages.add_message(request, 40, f"Already logged In!", extra_tags="success")
         return redirect('index')
     return render(request, 'main/login.html')
 
@@ -101,7 +103,9 @@ def upload_profile_image(request):
         return JsonResponse({'message': 'File uploaded successfully!', 'success': True}, status=201)
     return redirect('index')
 
+@login_required
 def logout(request):
+    messages.add_message(request, 40, f"Logged out successfully!", extra_tags="success")
     logout_user(request)
     return redirect('index')
 
@@ -121,7 +125,7 @@ def send_verification_code(request):
             return JsonResponse({'message': f"{email} is not a registered user email", "success": False})
         # Generate code and send it to email
         verification_code = generate_verification_code()
-        cache.set(f"verification_status:{user.email}", verification_code, timeout=300)
+        cache.set(f"verification_code:{user.email}", verification_code, timeout=300)
         subject = 'Your verification code!'
         template = 'verification_code.html'
         recipient = [user.email]
@@ -188,6 +192,20 @@ def verify_user(request, encoded_email):
     else:
         messages.add_message(request, 40, f"User is already verified!", extra_tags="success")
     login_user(request, user, backend=AUTH_BACKEND)
+    return redirect('index')
+
+@login_required
+def user_verification_status(request):
+    verified_status = cache.get(f"verification_status:{request.user.email}")
+    if verified_status:
+        return JsonResponse({'message': f"Verification Incomplete!", "success": True})
+    else:
+        return JsonResponse({'message': f"Verification Complete!", "success": False})
+
+@login_required
+def resend_verification_email(request):
+    send_verification_email(request.user)
+    messages.add_message(request, 40, f"Verification email has been sent to {request.user.email}, check inbox and click on the link!", extra_tags="success")
     return redirect('index')
 
 @login_required

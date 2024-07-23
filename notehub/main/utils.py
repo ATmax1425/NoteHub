@@ -7,6 +7,7 @@ import secrets
 from os.path import join
 
 from django.conf import settings
+from django.core.cache import cache
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -92,3 +93,11 @@ def decode_with_random_salt(encoded_string):
     decoded_bytes = base64.urlsafe_b64decode(actual_encoded_string.encode())
     decoded_string = decoded_bytes.decode()
     return decoded_string
+
+def send_verification_email(user, ):
+    cache.set(f"verification_status:{user.email}", 'pending')
+    recipient = [user.email]
+    subject = 'Welcome Onboard!'
+    template = 'welcome_user.html'
+    metadata = {'user': user, 'url': f'{settings.PROJECT_URL}/{encode_with_random_salt(user.email)}/verify'}
+    send_email(recipient, subject, template, metadata)

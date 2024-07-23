@@ -20,11 +20,6 @@ Notehub
 <div class="full-height-container">
     <div class="centered-element" style="background: none;">
         <form class="form" method="post" action="{% url 'register' %}">
-            {% for message in messages %}
-                <div class="alert alert-danger alert-{{message.extra_tags}} fade show text-dark m-0" role="alert">
-                    {{message}}
-                </div>
-            {% endfor %}
             <h1 class="p-2">Sign Up</h1>
             {% csrf_token %}
             <div class="form-group p-2">
