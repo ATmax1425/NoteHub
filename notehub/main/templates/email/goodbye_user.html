@@ -1,0 +1,19 @@
+{% extends 'email/base.html' %}
+
+{% block title %}
+    Welcome to Our Service
+{% endblock %}
+
+{% block body %}
+    <p>
+        Hello 
+        {% if user.first_name %}
+            {{user.first_name}} {{user.first_name}}
+        {% else %}
+            User
+        {% endif %}
+    </p>
+    <p>Thank you for staying connected to our services.</p>
+    <p>Goodbye! We are sorry to see you go.</p>
+    <p>Best regards,<br>The NoteHub Team</p>
+{% endblock %}
