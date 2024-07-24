@@ -65,8 +65,9 @@ def upload_to_drive(file_path, file_name):
         'role': 'reader'
     }
     service.permissions().create(fileId=file.get('id'), body=permission).execute()
+    url = f"https://drive.google.com/file/d/{file.get('id')}/view"
 
-    return file.get('id')
+    return url
 
 def send_email(recipients, subject, template, metadata):
     try:
