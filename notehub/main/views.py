@@ -22,6 +22,15 @@ from .utils import generate_verification_code, upload_to_drive, send_email, deco
 
 AUTH_BACKEND = 'django.contrib.auth.backends.ModelBackend'
 
+GOOGLE_CLIENT_AUTH_TOKEN_FILE = 'google-client-auth-token.json'
+
+with open(join(settings.BASE_DIR, GOOGLE_CLIENT_AUTH_TOKEN_FILE)) as file:
+    GOOGLE_CLIENT_AUTH_TOKEN = json.load(file)
+
+metadata_dict = {
+    'full_login_url': GOOGLE_CLIENT_AUTH_TOKEN['web']['full_login_url']
+}
+
 def index(request):
     return render(request, 'main/index.html')
 
@@ -47,7 +56,7 @@ def login(request):
     if request.user.is_authenticated:
         messages.add_message(request, 40, f"Already logged In!", extra_tags="success")
         return redirect('index')
-    return render(request, 'main/login.html')
+    return render(request, 'main/login.html', metadata_dict)
 
 def register(request):
     if request.method == 'POST':
@@ -64,7 +73,7 @@ def register(request):
         return render(request, 'main/register_intermediate.html')
     if request.user.is_authenticated:
         return redirect('index')
-    return render(request, 'main/register.html')
+    return render(request, 'main/register.html', metadata_dict)
 
 @login_required(login_url='/login')
 def register_int(request):

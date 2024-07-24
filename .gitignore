@@ -2,7 +2,7 @@
 /notehub/notehub/__pycache__
 /notehub/main/__pycache__
 /notehub/main/templatetags/__pycache__
-/google-client-auth-token.json
+/notehub/google-client-auth-token.json
 /notehub/media
 /notehub/main/migrations/__pycache__
 /notehub/email_config.json

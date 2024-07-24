@@ -37,7 +37,7 @@ Notehub
         <div>
             {% load socialaccount %}
             <div class="form-group p-2">
-                <a class="btn btn-outline-dark" href="{% provider_login_url 'google' %}?next=/" style="width: 100%;"><i class="fa fa-google"></i> Sign In with Google</a>
+                <a class="btn btn-outline-dark" href="{{full_login_url}}?next=/" style="width: 100%;"><i class="fa fa-google"></i> Sign In with Google</a>
             </div>
         </div>
     </div>
