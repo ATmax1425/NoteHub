@@ -39,7 +39,7 @@
                             </li>
                             <li class="nav-item dropdown">
                                 <a class="btn dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                                    {{user.email|username_from_email}}
+                                    {{user.email|username_from_email}} <img src="{{user.profile.profile_url|customise_url:30}}" style="border-radius:50%;">
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                                     <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
