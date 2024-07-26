@@ -20,6 +20,21 @@
                 font-weight: 500;
                 font-style: normal;
             }
+            .full-height-container {
+                min-height: 100vh;
+                background-image: url('{% static "background/background-index.jpg" %}');
+                background-size: 100% auto;
+                background-repeat: repeat-y;
+                background-position: center top;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .full-height-container .content {
+        position: relative; /* Position content relative to the container */
+        z-index: 1; /* Ensure content appears on top */
+        /* Add any additional styling for your content here */
+    }
         </style>
     </head>
     <body>
@@ -103,8 +118,12 @@
                 </div>
             </div>
         {% endif %}
-        {% block body %}
-        {% endblock %}
+        <div class="full-height-container">
+            <div class="centered-element">        
+                {% block body %}
+                {% endblock %}
+            </div>
+        </div>
         <div class="container-fluid bg-light text-center pt-3">
             <p>Designed and built with all the love in the world by the Pavan Jain</p>
         </div>

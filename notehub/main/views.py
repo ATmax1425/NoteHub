@@ -56,7 +56,10 @@ def login(request):
     if request.user.is_authenticated:
         messages.add_message(request, 40, f"Already logged In!", extra_tags="success")
         return redirect('index')
-    return render(request, 'main/login.html', metadata_dict)
+
+    data = {}
+    data.update(metadata_dict)
+    return render(request, 'main/login.html', data)
 
 def register(request):
     if request.method == 'POST':
@@ -73,7 +76,10 @@ def register(request):
         return render(request, 'main/register_intermediate.html')
     if request.user.is_authenticated:
         return redirect('index')
-    return render(request, 'main/register.html', metadata_dict)
+
+    data = {}
+    data.update(metadata_dict)
+    return render(request, 'main/register.html', data)
 
 @login_required(login_url='/login')
 def register_int(request):
@@ -103,9 +109,8 @@ def upload_profile_image(request):
         try:
             user_profile = UserProfile.objects.get(user=request.user)
             user_profile.profile_url = profile_url
-            user_profile.updated_at = datetime.now()
         except:
-            user_profile = UserProfile(user=request.user, profile_url=profile_url, created_at = datetime.now(), updated_at=datetime.now())
+            user_profile = UserProfile(user=request.user, profile_url=profile_url)
         user_profile.save()
 
         return JsonResponse({'message': 'File uploaded successfully!', 'success': True}, status=201)
@@ -222,4 +227,6 @@ def profile(request):
 
 @login_required
 def feed(request):
-    return redirect('index')
+    data = {}
+    data.update(metadata_dict)
+    return render(request, 'main/feed.html', data)
