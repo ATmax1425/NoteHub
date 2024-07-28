@@ -15,4 +15,4 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
-    list_display = ['title', 'description', 'author', 'file_url', 'created_at', 'updated_at']
+    list_display = ['title', 'author', 'file_url', 'file_type', 'file_size', 'created_at', 'updated_at']

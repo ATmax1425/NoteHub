@@ -17,4 +17,6 @@ urlpatterns = [
     path('logout/', views.logout, name='logout'),
     path('profile/', views.profile, name='profile'),
     path('feed/', views.feed, name='feed'),
+    path('upload_document_file/', views.upload_document_file, name='upload-document-file'),
+    path('add_notes/', views.add_notes, name='add-notes'),
 ]

@@ -32,7 +32,9 @@ class Document(BaseModel):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='documents')
-    file_url = models.CharField(max_length=500)
+    file_url = models.URLField(max_length=500)
+    file_size = models.IntegerField(default=0)
+    file_type = models.CharField(max_length=100, default="Text Document")
     tags = models.ManyToManyField(Tag, blank=True, related_name='documents')
 
     def __str__(self):

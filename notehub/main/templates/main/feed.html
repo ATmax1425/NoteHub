@@ -6,10 +6,88 @@ Notehub
 {% endblock %}
 
 {% block body %}
+<style>
+    .modal-content{
+        background-image: url("{% static 'background/background-index.jpg' %}");
+        background-size: cover;
+    }
+</style>
+<script>
+    $(document).ready(function() {
+        $('#upload_document_file').on('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+            
+            var csrfToken = $('[name="csrfmiddlewaretoken"]').val();
+            $.ajax({
+                url: '{% url "upload-document-file" %}',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {'X-CSRFToken': csrfToken},  // Include CSRF token
+                success: function(response) {
+                    alert('Document uploaded successfully');
+                    $("#document_url").val(response.document_url);
+                    $("#document_type").val(response.document_type);
+                    $("#document_size").val(response.document_size);
+                    $("#finish-button").prop("disabled", false);
+                },
+                error: function(response) {
+                    alert('Error: ' + JSON.stringify(response.responseJSON.error));
+                }
+            });
+        });
+    });
+</script>
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-9"></div>
-        <div class="col-md-3"></div>
+        <div class="col-md-3">
+            <div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                    <i class="fa fa-upload"></i> New Notes
+                </button>
+                <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="staticBackdropLabel">Upload Notes</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div>
+                                    <form class="form" method="post" enctype="multipart/form-data" id="upload_document_file">
+                                        {% csrf_token %}
+                                        <label for="formFile" class="form-label p-2">Add a file</label>
+                                        <div class="input-group p-2">
+                                            <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload" name="attached_doc" required>
+                                            <button class="btn btn-outline-dark" type="submit" id="inputGroupFileAddon04">Upload</button>
+                                        </div>
+                                    </form>
+                                    <form class="form" method="post" action="{% url 'add-notes' %}" enctype="multipart/form-data" id="add_notes_form">
+                                        {% csrf_token %}
+                                        <input type="text" id="document_url" name="document_url" hidden>
+                                        <input type="text" id="document_type" name="document_type" hidden>
+                                        <input type="number" id="document_size" name="document_size" hidden>
+                                        <div class="form-group p-2">
+                                            <input type="text" class="form-control" placeholder="Title..." name="document_title" required>
+                                        </div>
+                                        <div class="form-group p-2">
+                                            <textarea class="form-control" placeholder="Description..." name="document_desc" rows="8" required></textarea>
+                                        </div>
+                                        <div class="form-group p-2">
+                                            <button class="btn btn-dark" type="submit" id="finish-button" style="width: 100%;" disabled>Post</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -1,6 +1,8 @@
 import os
 import json
 import uuid
+import re
+import mimetypes
 from os.path import join
 from datetime import datetime
 
@@ -17,7 +19,7 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import FileSystemStorage
 
-from .models import UserProfile
+from .models import UserProfile, Document, Tag
 from .utils import generate_verification_code, upload_to_drive, send_email, decode_with_random_salt, send_verification_email
 
 AUTH_BACKEND = 'django.contrib.auth.backends.ModelBackend'
@@ -230,3 +232,53 @@ def feed(request):
     data = {}
     data.update(metadata_dict)
     return render(request, 'main/feed.html', data)
+
+@login_required
+def upload_document_file(request):
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        try:
+            user = User.objects.get(id=request.user.id)
+        except:
+            return JsonResponse({'message': f"{request.user.email} is not a registered user email", "success": False})
+        random_id = str(uuid.uuid1())
+        file = request.FILES['attached_doc']
+        fs = FileSystemStorage()
+        filename = fs.save(f"{random_id}_{file.name}", file)
+        file_path = fs.path(filename)
+        document_url = upload_to_drive(file_path, f"{random_id}_{file.name}")
+        document_size = fs.size(file_path)
+        document_type, _ = mimetypes.guess_type(fs.path(file_path))
+        fs.delete(file_path)
+        return JsonResponse({
+            'message': 'File uploaded successfully!', 
+            'success': True,
+            'document_url': document_url,
+            'document_size': document_size,
+            'document_type': document_type
+        }, status=201)
+    return redirect('index')
+
+@login_required
+def add_notes(request):
+    if request.method == 'POST':
+        document_title = request.POST['document_title']
+        document_desc = request.POST['document_desc']
+        document_type = request.POST['document_type']
+        document_size = request.POST['document_size']
+        document_url = request.POST['document_url']
+        
+        document = Document.objects.create(
+            title=document_title,
+            description=document_desc,
+            author=request.user,
+            file_url=document_url,
+            file_size=document_size,
+            file_type=document_type
+        )
+
+        tags = re.findall(r'#\w[\w-]*', document_desc)
+        tags = [Tag.objects.get_or_create(name=tag_name)[0] for tag_name in tags]
+        document.tags.set(tags)
+        document.save()
+
+    return redirect('feed')
