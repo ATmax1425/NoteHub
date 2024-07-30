@@ -23,6 +23,7 @@ Notehub
                 success: function(response) {
                     alert(response.message);
                     $("#finish-button").prop("disabled", false);
+                    $('#upload-button').prop("disabled", true);
                 },
                 error: function(response) {
                     alert('Error: ' + JSON.stringify(response.responseJSON.error));
@@ -36,8 +37,8 @@ Notehub
     <h1 class="p-2">Just a few more details</h1>
     <label for="formFile" class="form-label p-2">Select your profile picture</label>
     <div class="input-group p-2">
-        <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload" name="profile_image" required>
-        <button class="btn btn-outline-dark" type="submit" id="inputGroupFileAddon04">Upload</button>
+        <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="upload-button" aria-label="Upload" name="profile_image" required>
+        <button class="btn btn-outline-dark" type="submit" id="upload-button">Upload</button>
     </div>
 </form>
 <form class="form" method="post" action="{% url 'register-int' %}" enctype="multipart/form-data">

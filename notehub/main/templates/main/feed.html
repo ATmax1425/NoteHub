@@ -32,6 +32,7 @@ Notehub
                     $("#document_type").val(response.document_type);
                     $("#document_size").val(response.document_size);
                     $("#finish-button").prop("disabled", false);
+                    $("#upload-button").prop("disabled", true);
                 },
                 error: function(response) {
                     alert('Error: ' + JSON.stringify(response.responseJSON.error));
@@ -62,8 +63,8 @@ Notehub
                                         {% csrf_token %}
                                         <label for="formFile" class="form-label p-2">Add a file</label>
                                         <div class="input-group p-2">
-                                            <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload" name="attached_doc" required>
-                                            <button class="btn btn-outline-dark" type="submit" id="inputGroupFileAddon04">Upload</button>
+                                            <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="upload-button" aria-label="Upload" name="attached_doc" required>
+                                            <button class="btn btn-outline-dark" type="submit" id="upload-button">Upload</button>
                                         </div>
                                     </form>
                                     <form class="form" method="post" action="{% url 'add-notes' %}" enctype="multipart/form-data" id="add_notes_form">
