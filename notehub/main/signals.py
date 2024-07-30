@@ -3,9 +3,10 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.conf import settings
-from .models import SocialUsersProfile, UserProfile
+from .models import SocialUsersProfile, UserProfile, Document
 from datetime import datetime
 from .utils import send_verification_email, send_email
+from .documents import DocumentDocument
 
 @receiver(post_save, sender=User)
 def user_created_handler(sender, instance, created, **kwargs):
@@ -30,3 +31,12 @@ def user_deleted_handler(sender, instance, **kwargs):
     template = 'goodbye_user.html'
     metadata = {'user': instance}
     send_email(recipients, subject, template, metadata)
+
+
+@receiver(post_save, sender=Document)
+def index_document(sender, instance, **kwargs):
+    DocumentDocument().update(instance)
+    
+@receiver(post_delete, sender=Document)
+def delete_document(sender, instance, **kwargs):
+    DocumentDocument().delete(instance)
