@@ -19,4 +19,5 @@ urlpatterns = [
     path('feed/', views.feed, name='feed'),
     path('upload_document_file/', views.upload_document_file, name='upload-document-file'),
     path('add_notes/', views.add_notes, name='add-notes'),
+    path('load_posts/<int:limit>/<str:last_doc_id>/', views.load_posts, name='load-posts'),
 ]

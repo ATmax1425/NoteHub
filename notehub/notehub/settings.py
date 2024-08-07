@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_elasticsearch_dsl',
+    'rest_framework',
     'main',
     'django.contrib.sites',  # Required for django-allauth
     'allauth',

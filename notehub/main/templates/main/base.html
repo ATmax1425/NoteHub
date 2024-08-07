@@ -31,10 +31,18 @@
                 align-items: center;
             }
             .full-height-container .content {
-        position: relative; /* Position content relative to the container */
-        z-index: 1; /* Ensure content appears on top */
-        /* Add any additional styling for your content here */
-    }
+                position: relative; /* Position content relative to the container */
+                z-index: 1; /* Ensure content appears on top */
+                /* Add any additional styling for your content here */
+            }
+            pre {
+                white-space: pre-wrap; /* Allows text to wrap within the pre tag */
+                word-wrap: break-word; /* Ensures long words break to fit the container */
+                max-width: 100%; /* Optional: limits width to ensure responsiveness */
+                overflow-wrap: anywhere; /* Ensures overflow text wraps */
+                padding: 10px; /* Optional: adds padding for readability */
+                margin: 0; /* Optional: resets margin */
+        }
         </style>
     </head>
     <body>

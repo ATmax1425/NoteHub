@@ -21,6 +21,7 @@ from django.core.files.storage import FileSystemStorage
 
 from .models import UserProfile, Document, Tag
 from .utils import generate_verification_code, upload_to_drive, send_email, decode_with_random_salt, send_verification_email
+from .serailizers import DocumentSerializer
 
 AUTH_BACKEND = 'django.contrib.auth.backends.ModelBackend'
 
@@ -232,6 +233,15 @@ def feed(request):
     data = {}
     data.update(metadata_dict)
     return render(request, 'main/feed.html', data)
+
+@login_required
+def load_posts(request, limit, last_doc_id):
+    if int(last_doc_id) == -1:
+        documents = Document.objects.all().order_by('-id')[:limit]
+    else:
+        documents = Document.objects.filter(id__lt=last_doc_id).order_by('-id')[:limit]
+    documents_serailizer = DocumentSerializer(documents, many=True)
+    return JsonResponse({'data': documents_serailizer.data, 'success': True}, safe=False)
 
 @login_required
 def upload_document_file(request):

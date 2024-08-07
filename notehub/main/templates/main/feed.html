@@ -43,8 +43,61 @@ Notehub
 </script>
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-md-9"></div>
+    <div class="row" style="padding: 20px;">
+        <div class="col-md-9">
+            <div id="post-div"></div>
+            <div style="text-align:center">
+                <input type="number" id="last-doc-id" value="-1" hidden>
+                <button type="button" class="btn btn-outline-dark" id="load-more-post">Show More</button>
+                <span id="no-more-post" class="btn btn-outline-dark" style="display: none;">No more Articles</span>
+            </div>
+            <script>
+                $(document).ready(function() {
+                    const post_limit = 1;
+                    var send_request = true;
+                    function load_posts(limit, last_doc_id){
+                        const baseUrl = "{% url 'load-posts' 0 0 %}"
+                        const url = baseUrl.replace('0/0', `${limit}/${last_doc_id}`);
+                        $.ajax({
+                            url: url,
+                            type: 'GET',
+                            success: function(response) {
+                                if(response.success){
+                                    var minId = Number.MAX_SAFE_INTEGER;
+                                    response.data.forEach(element => {
+                                        if(minId > element.id){
+                                            minId = element.id;
+                                        }
+                                        var title = $('<h3></h3>').text(element.title);
+                                        title.css({'padding': '10px'});
+                                        var description = $('<pre></pre>').text(element.description);
+                                        var newDiv = $('<div></div>').append(title).append(description);
+                                        newDiv.addClass('container bg-light');
+                                        newDiv.css({'padding': '10px'});
+                                        $('#post-div').append(newDiv);
+                                        $('#post-div').append('<br/>');
+                                    });
+                                    if(minId !== Number.MAX_SAFE_INTEGER){
+                                        $('#last-doc-id').val(minId);
+                                    }
+                                    else{
+                                        $('#load-more-post').hide();
+                                        $('#no-more-post').show();
+                                    }
+                                }
+                            },
+                            error: function(response) {
+                                alert('Error: ' + JSON.stringify(response.responseJSON.error));
+                            }
+                        });
+                    }
+                    load_posts(post_limit, $('#last-doc-id').val());
+                    $('#load-more-post').click(function(){
+                        load_posts(post_limit, $('#last-doc-id').val());
+                    })
+                });
+            </script>
+        </div>
         <div class="col-md-3">
             <div>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
