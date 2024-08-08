@@ -19,6 +19,7 @@ Notehub
             var formData = new FormData(this);
             
             var csrfToken = $('[name="csrfmiddlewaretoken"]').val();
+            $("#upload-button").prop("disabled", true);
             $.ajax({
                 url: '{% url "upload-document-file" %}',
                 type: 'POST',
@@ -32,7 +33,7 @@ Notehub
                     $("#document_type").val(response.document_type);
                     $("#document_size").val(response.document_size);
                     $("#finish-button").prop("disabled", false);
-                    $("#upload-button").prop("disabled", true);
+                    $("#upload-button").prop("disabled", false);
                 },
                 error: function(response) {
                     alert('Error: ' + JSON.stringify(response.responseJSON.error));
@@ -49,12 +50,11 @@ Notehub
             <div style="text-align:center">
                 <input type="number" id="last-doc-id" value="-1" hidden>
                 <button type="button" class="btn btn-outline-dark" id="load-more-post">Show More</button>
-                <span id="no-more-post" class="btn btn-outline-dark" style="display: none;">No more Articles</span>
+                <span id="no-more-post" class="btn btn-dark" style="display: none;">No more Articles</span>
             </div>
             <script>
                 $(document).ready(function() {
-                    const post_limit = 1;
-                    var send_request = true;
+                    const post_limit = 5;
                     function load_posts(limit, last_doc_id){
                         const baseUrl = "{% url 'load-posts' 0 0 %}"
                         const url = baseUrl.replace('0/0', `${limit}/${last_doc_id}`);
@@ -68,13 +68,51 @@ Notehub
                                         if(minId > element.id){
                                             minId = element.id;
                                         }
-                                        var title = $('<h3></h3>').text(element.title);
-                                        title.css({'padding': '10px'});
-                                        var description = $('<pre></pre>').text(element.description);
-                                        var newDiv = $('<div></div>').append(title).append(description);
-                                        newDiv.addClass('container bg-light');
-                                        newDiv.css({'padding': '10px'});
-                                        $('#post-div').append(newDiv);
+                                        var container = $('<div></div>');
+                                        container.addClass('container bg-light');
+                                        container.css({'padding': '20px'});
+
+                                        var row1 = $('<div></div>');
+                                        row1.addClass('row');
+                                        var col11 = $('<div></div>');
+                                        col11.addClass('col-md-6');
+                                        var img = $('<img>');
+                                        var url = customiseUrl(element.author.profile.profile_url, 30);
+                                        img.attr({
+                                            'src': url,
+                                            'alt': 'Profile Image',
+                                            'class': 'profile-image',
+                                        });
+                                        img.css({'border-radius': '50%'});
+                                        col11.append(img);
+                                        var span = $('<span></span>').text(element.author.username);
+                                        span.css({'padding': '5px'});
+                                        col11.append(span);
+
+                                        var col21 = $('<div></div>');
+                                        col21.addClass('col-md-6');
+                                        col21.css({'text-align': 'right'});
+                                        var span = $('<span></span>').text(timeAgo(element.created_at));
+                                        span.css({'padding': '5px'});
+                                        col21.append(span);
+
+                                        row1.append(col11).append(col21);
+
+                                        var row2 = $('<div></div>');
+                                        row2.addClass('row');
+                                        var col21 = $('<div></div>');
+                                        col21.addClass('col-md-12');
+                                        col21.append($('<h3></h3>').text(element.title));
+                                        const processedText = element.description.replace(/#\w[\w-]*/g, function(match) {
+                                            const tag = match.substring(1);
+                                            return `<a href="/tags/${tag}" class="badge bg-primary hash-links">${match}</a>`;
+                                        });
+                                        col21.append($('<pre></pre>').html(processedText));
+
+                                        row2.append(col21);
+
+                                        container.append(row1).append('<br/>').append(row2);
+                                        $('#post-div').append(container);
                                         $('#post-div').append('<br/>');
                                     });
                                     if(minId !== Number.MAX_SAFE_INTEGER){

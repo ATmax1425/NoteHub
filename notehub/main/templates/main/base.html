@@ -9,6 +9,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
         <link rel="icon" href="{% static 'logo/logo.png' %}">
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="{% static 'js/scripts.js' %}"></script>
         <title>
             {% block title %}
             {% endblock %}
@@ -42,7 +43,13 @@
                 overflow-wrap: anywhere; /* Ensures overflow text wraps */
                 padding: 10px; /* Optional: adds padding for readability */
                 margin: 0; /* Optional: resets margin */
-        }
+            }
+            .hash-links {
+                text-decoration: none;
+            }
+            .hash-links:hover {
+                color: rgb(255, 255, 255);
+            }
         </style>
     </head>
     <body>

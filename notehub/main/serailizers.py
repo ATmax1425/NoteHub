@@ -1,5 +1,18 @@
 from rest_framework import serializers
-from .models import Document, Tag
+from .models import Document, Tag, UserProfile
+from django.contrib.auth.models import User
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['profile_url']
+
+class UserSerializer(serializers.ModelSerializer):
+    profile = UserProfileSerializer(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'profile']
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -7,7 +20,7 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 class DocumentSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField()
+    author = UserSerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
 
     class Meta:
