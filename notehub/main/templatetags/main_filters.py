@@ -1,5 +1,7 @@
 import re
+import math
 from django import template
+from datetime import datetime
 
 register = template.Library()
 
@@ -27,3 +29,49 @@ def customise_url(image_url, size):
         image_url = re.sub(pattern, str(size), image_url)
 
     return image_url
+
+@register.filter
+def time_ago(timestamp):
+    now = datetime.now()
+    post_date = datetime.fromtimestamp(timestamp)
+    diff_in_seconds = int((now - post_date).total_seconds())
+
+    seconds = diff_in_seconds
+    minutes = diff_in_seconds // 60
+    hours = diff_in_seconds // 3600
+    days = diff_in_seconds // 86400
+    months = diff_in_seconds // (86400 * 30.44)
+    years = diff_in_seconds // (86400 * 365.25)
+
+    if years > 0:
+        return "1 year ago" if years == 1 else f"{years} years ago"
+    elif months > 0:
+        return "1 month ago" if months == 1 else f"{months} months ago"
+    elif days > 0:
+        return "1 day ago" if days == 1 else f"{days} days ago"
+    elif hours > 0:
+        return "1 hour ago" if hours == 1 else f"{hours} hours ago"
+    elif minutes > 0:
+        return "1 minute ago" if minutes == 1 else f"{minutes} minutes ago"
+    else:
+        return "1 second ago" if seconds == 1 else f"{seconds} seconds ago"
+
+@register.filter
+def convert_size(size_bytes):
+    if size_bytes == 0:
+        return "0 B"
+    
+    size_names = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    size = round(size_bytes / math.pow(1024, i), 2)
+    
+    return f"{size} {size_names[i]}"
+
+@register.filter
+def convert_drive_file_url(source_url):
+    match = re.search(r'/d/([a-zA-Z0-9_-]+)', source_url)
+    if match:
+        file_id = match.group(1)
+        target_url = f"https://drive.usercontent.google.com/u/0/uc?id={file_id}&export=download"
+        return target_url
+    return None

@@ -39,5 +39,4 @@ def index_document(sender, instance, **kwargs):
     
 @receiver(post_delete, sender=Document)
 def delete_document(sender, instance, **kwargs):
-    return
     DocumentDocument().delete(instance)

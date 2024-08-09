@@ -111,7 +111,25 @@ Notehub
 
                                         row2.append(col21);
 
-                                        container.append(row1).append('<br/>').append(row2);
+                                        var row3 = $('<div></div>');
+                                        row3.addClass('row');
+                                        var col31 = $('<div></div>');
+                                        col31.addClass('col-md-3');
+                                        col31.css({'text-align': 'right'});
+                                        var downloadBox = $('<a></a>').addClass('btn btn-outline-dark').css({'padding':'10px'});
+                                        downloadBox.attr({
+                                            'href': convertDriveFileUrl(element.file_url),
+                                            'target': '_blank'
+                                        });
+                                        var downloadIcon = $('<i></i>').addClass('fa fa-download');
+                                        var downloadText = $('<span></span>').text('Download Notes File').css({'padding-left': '5px'});
+                                        var downloadSize = $('<span></span>').text(convertSize(element.file_size)).css({'padding-left': '5px'});
+                                        downloadBox.append(downloadIcon).append(downloadText).append('<br/>').append(downloadSize);
+
+                                        col31.append(downloadBox);
+                                        row3.append(col31);
+
+                                        container.append(row1).append('<br/>').append(row2).append('<br/>').append(row3);
                                         $('#post-div').append(container);
                                         $('#post-div').append('<br/>');
                                     });
