@@ -5,6 +5,7 @@ import re
 import mimetypes
 from os.path import join
 from datetime import datetime
+from elasticsearch_dsl import Q
 
 from django.conf import settings
 from django.core.cache import cache
@@ -21,18 +22,19 @@ from django.core.files.storage import FileSystemStorage
 
 from .models import UserProfile, Document, Tag
 from .utils import generate_verification_code, upload_to_drive, send_email, decode_with_random_salt, send_verification_email
-from .serailizers import DocumentSerializer
+from .serailizers import DocumentSerializer, BasicDocumentSerializer
+from .documents import DocumentDocument
 
 AUTH_BACKEND = 'django.contrib.auth.backends.ModelBackend'
 
-GOOGLE_CLIENT_AUTH_TOKEN_FILE = 'google-client-auth-token.json'
+# GOOGLE_CLIENT_AUTH_TOKEN_FILE = 'google-client-auth-token.json'
 
-with open(join(settings.BASE_DIR, GOOGLE_CLIENT_AUTH_TOKEN_FILE)) as file:
-    GOOGLE_CLIENT_AUTH_TOKEN = json.load(file)
+# with open(join(settings.BASE_DIR, GOOGLE_CLIENT_AUTH_TOKEN_FILE)) as file:
+#     GOOGLE_CLIENT_AUTH_TOKEN = json.load(file)
 
-metadata_dict = {
-    'full_login_url': GOOGLE_CLIENT_AUTH_TOKEN['web']['full_login_url']
-}
+# metadata_dict = {
+#     'full_login_url': GOOGLE_CLIENT_AUTH_TOKEN['web']['full_login_url']
+# }
 
 def index(request):
     return render(request, 'main/index.html')
@@ -60,9 +62,7 @@ def login(request):
         messages.add_message(request, 40, f"Already logged In!", extra_tags="success")
         return redirect('index')
 
-    data = {}
-    data.update(metadata_dict)
-    return render(request, 'main/login.html', data)
+    return render(request, 'main/login.html')
 
 def register(request):
     if request.method == 'POST':
@@ -80,9 +80,7 @@ def register(request):
     if request.user.is_authenticated:
         return redirect('index')
 
-    data = {}
-    data.update(metadata_dict)
-    return render(request, 'main/register.html', data)
+    return render(request, 'main/register.html')
 
 @login_required(login_url='/login')
 def register_int(request):
@@ -230,9 +228,7 @@ def profile(request):
 
 @login_required
 def feed(request):
-    data = {}
-    data.update(metadata_dict)
-    return render(request, 'main/feed.html', data)
+    return render(request, 'main/feed.html')
 
 @login_required
 def load_posts(request, limit, last_doc_id):
@@ -292,3 +288,28 @@ def add_notes(request):
         document.save()
 
     return redirect('feed')
+
+def search_documents(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        query = request.GET.get('q', '')
+        search_query = Q('bool', should=[
+            Q('multi_match', query=query, fields=['title', 'description', 'tags.raw']),
+            Q('match', author__username={
+                'query': query.lower(),
+                'fuzziness': 'AUTO'
+            })
+        ])
+        search_results = DocumentDocument.search().query(search_query)
+        results = search_results.to_queryset()
+        basic_document_serailizer = BasicDocumentSerializer(results, many=True)
+        return JsonResponse({'data': basic_document_serailizer.data, 'success': True})
+
+    return JsonResponse({'data': None, 'success': False})
+
+def posts(request, id):
+    try:
+        post = Document.objects.select_related('author__profile').get(id=id)
+        return render(request, 'main/posts.html', {'post': post})
+    except:
+        data = {'content': 'The post is unavailable'}
+        return render(request, 'main/404.html', data)

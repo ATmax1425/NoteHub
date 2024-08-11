@@ -2,6 +2,7 @@ import re
 import math
 from django import template
 from datetime import datetime
+from django.utils import timezone
 
 register = template.Library()
 
@@ -31,9 +32,10 @@ def customise_url(image_url, size):
     return image_url
 
 @register.filter
-def time_ago(timestamp):
-    now = datetime.now()
-    post_date = datetime.fromtimestamp(timestamp)
+def time_ago(post_date):
+    now = timezone.now()
+    if timezone.is_naive(post_date):
+        post_date = timezone.make_aware(post_date, timezone.get_default_timezone())
     diff_in_seconds = int((now - post_date).total_seconds())
 
     seconds = diff_in_seconds
@@ -75,3 +77,12 @@ def convert_drive_file_url(source_url):
         target_url = f"https://drive.usercontent.google.com/u/0/uc?id={file_id}&export=download"
         return target_url
     return None
+
+@register.filter
+def process_text(description):
+    def replace_match(match):
+        tag = match.group(0)[1:]
+        return f'<a href="/tags/{tag}" class="badge bg-primary hash-links">{match.group(0)}</a>'
+
+    processed_text = re.sub(r'#\w[\w-]*', replace_match, description)
+    return processed_text

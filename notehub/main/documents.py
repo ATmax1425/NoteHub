@@ -6,7 +6,23 @@ from .models import Document as DocumentModel, Tag
 documents_index = Index('documents')
 documents_index.settings(
     number_of_shards=1,
-    number_of_replicas=0
+    number_of_replicas=0,
+    analysis={
+        'analyzer': {
+            'edge_ngram_analyzer': {
+                'type': 'custom',
+                'tokenizer': 'edge_ngram_tokenizer'
+            }
+        },
+        'tokenizer': {
+            'edge_ngram_tokenizer': {
+                'type': 'edge_ngram',
+                'min_gram': 1,
+                'max_gram': 20,
+                'token_chars': ['letter', 'digit']
+            }
+        }
+    }
 )
 
 @documents_index.doc_type
@@ -30,8 +46,18 @@ class DocumentDocument(Document):
         }
     )
 
+    author = fields.ObjectField(
+        attr='author',
+        properties={
+            'username': fields.TextField(
+                analyzer='edge_ngram_analyzer'
+            ),
+            'email': fields.KeywordField(),
+        }
+    )
+
     class Django:
-        model = DocumentModel  # The model associated with this Document
+        model = DocumentModel
         fields = [
             'id',
             'file_url',
@@ -41,3 +67,9 @@ class DocumentDocument(Document):
 
     def get_tags(self, obj):
         return [tag.name for tag in obj.tags.all()]
+
+    def get_author(self, obj):
+        return {
+            'username': obj.author.username,
+            'email': obj.author.email,
+        }

@@ -44,7 +44,7 @@
                 padding: 10px; /* Optional: adds padding for readability */
                 margin: 0; /* Optional: resets margin */
             }
-            .hash-links {
+            a {
                 text-decoration: none;
             }
             .hash-links:hover {
@@ -135,8 +135,10 @@
         {% endif %}
         <div class="full-height-container">
             <div class="centered-element">        
+                <br/><br/>
                 {% block body %}
                 {% endblock %}
+                <br/><br/>
             </div>
         </div>
         <div class="container-fluid bg-light text-center pt-3">

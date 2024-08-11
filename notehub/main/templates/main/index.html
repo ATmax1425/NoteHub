@@ -9,9 +9,88 @@ Notehub
 <h1>Want to study? then search...</h1>
 <div class="form">
     <div class="input-group mb-3">
-        <input type="text" class="form-control" placeholder="Topic, Content or Author...">
+        <input type="text" class="form-control" placeholder="Topic, Content or Author..." id="search-text">
         <div class="input-group-append">
-            <button class="btn btn-dark" type="button">Search</button>
+            <script>
+                $(document).ready(function() {
+                    function searchDocs(){
+                        $('#documents').empty();
+                        var searchText = $('#search-text').val();
+                        searchText = searchText.replace(/\s+/g, ' ');
+                        searchText = searchText.trim();
+                        var url = '{% url "search-documents" %}';
+                        url = url + `?q=${searchText}`;
+                        if(searchText.length >= 3){
+                            $.ajax({
+                                url: url,
+                                type: 'GET',
+                                success: function(response) {
+                                    if(response.success){
+                                        if(response.data.length !== 0){
+                                            response.data.forEach(element => {
+                                                var li = $('<li></li>');
+                                                li.addClass("list-group-item d-flex justify-content-between align-items-start");
+                                                var outerDiv = $('<div></div>');
+                                                outerDiv.addClass('ms-2 me-auto');
+                                                var innerDiv1 = $('<div></div>');
+                                                innerDiv1.addClass('fw-bold');
+                                                var anchor1 = $('<a></a>').text(element.title);
+                                                var url = '{% url "posts" 0 %}';
+                                                url = url.replace('0', element.id);
+                                                anchor1.attr({
+                                                    'href': url,
+                                                    'target': '_blank'
+                                                });
+                                                innerDiv1.html(anchor1);
+                                                var innerDiv2 = $('<div></div>');
+                                                innerDiv2.text(`By - ${element.author_name}`);
+                                                outerDiv.append(innerDiv1).append(innerDiv2);
+                                                var span = $('<span></span>').text(timeAgo(element.created_at));
+                                                span.addClass('badge bg-dark rounded-pill');
+                                                li.append(outerDiv).append(span);
+                                                $('#documents').append(li);
+                                            });
+                                        }
+                                        else{
+                                            var div = $('<div></div>');
+                                            div.css({'text-align': 'center', 'padding': '10px'});
+                                            div.addClass('bg-light');
+                                            var img = $('<img></img>');
+                                            img.attr({
+                                                'src': '{% static "background/no_results.png" %}',
+                                                'height': '30%',
+                                                'width': '30%'
+                                            })
+                                            div.append(img);
+                                            div.append($('<h3></h3>').text('No results found'));
+                                            div.append($('<span></span>').text('We could not find what you searched for'));
+                                            div.append($('<br/>'));
+                                            div.append($('<span></span>').text('Try something again'));
+                                            $('#documents').append(div);
+                                        }
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    alert('An error occurred: ' + error);
+                                }
+                            });
+                        }
+                        else{
+                            alert('Enter more than 3 characters!');
+                        }
+                    };
+                    
+                    $('#search-button').click(searchDocs);
+                });
+            </script>
+            <button class="btn btn-dark" type="button" id="search-button">Search</button>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <ol class="list-group" id="documents"></ol>
+            </div>
         </div>
     </div>
 </div>

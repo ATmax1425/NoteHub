@@ -1,0 +1,44 @@
+{% extends 'main/base.html' %}
+{% load main_filters %}
+{% load static %}
+
+{% block title %}
+Notehub
+{% endblock %}
+
+{% block body %}
+<script>
+    $(document).ready(function() {
+        function convert_text_to_html(){
+            $('#description2').html($('#description1').text());
+            $('#description2').show();
+            $('#description1').hide();
+        }
+        convert_text_to_html();
+    });
+</script>
+<div class="container p-4 bg-light">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="{{post.author.profile.profile_url|customise_url:30}}" style="border-radius: 50%;"/>
+            <span style="padding: 5px;">{{post.author.username}}</span>
+        </div>
+        <div class="col-md-6" style="text-align: right;padding: 5px;">
+            <span>{{post.created_at|time_ago}}</span>
+        </div>
+        <div class="col-md-12 pt-3">
+            <h3>{{post.title}}</h3>
+            <pre id="description1">{{post.description|process_text}}</pre>
+            <pre id="description2" style="display: none;"></pre>
+        </div>
+        <div class="col-md-3 pt-3">
+            <a href="{{post.file_url|convert_drive_file_url}}" class="btn btn-outline-dark" target="_blank" style="padding:10px;width:100%;">
+                <i class="fa fa-download"></i>
+                <span style="padding:5px;">Download Notes File</span>
+                <br/>
+                <span style="padding:5px;">{{post.file_size|convert_size}}</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

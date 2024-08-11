@@ -45,7 +45,7 @@ Notehub
 
 <div class="container-fluid">
     <div class="row" style="padding: 20px;">
-        <div class="col-md-9">
+        <div class="col-md-10">
             <div id="post-div"></div>
             <div style="text-align:center">
                 <input type="number" id="last-doc-id" value="-1" hidden>
@@ -70,7 +70,7 @@ Notehub
                                         }
                                         var container = $('<div></div>');
                                         container.addClass('container bg-light');
-                                        container.css({'padding': '20px'});
+                                        container.css({'padding': '20px', 'border-radius': '10px'});
 
                                         var row1 = $('<div></div>');
                                         row1.addClass('row');
@@ -115,8 +115,8 @@ Notehub
                                         row3.addClass('row');
                                         var col31 = $('<div></div>');
                                         col31.addClass('col-md-3');
-                                        col31.css({'text-align': 'right'});
-                                        var downloadBox = $('<a></a>').addClass('btn btn-outline-dark').css({'padding':'10px'});
+                                        // col31.css({'text-align': 'right'});
+                                        var downloadBox = $('<a></a>').addClass('btn btn-outline-dark').css({'padding':'10px', 'width': "100%"});
                                         downloadBox.attr({
                                             'href': convertDriveFileUrl(element.file_url),
                                             'target': '_blank'
@@ -154,7 +154,7 @@ Notehub
                 });
             </script>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
                     <i class="fa fa-upload"></i> New Notes

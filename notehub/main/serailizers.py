@@ -21,11 +21,19 @@ class TagSerializer(serializers.ModelSerializer):
 
 class DocumentSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
-    tags = TagSerializer(many=True, read_only=True)
 
     class Meta:
         model = Document
         fields = [
             'id', 'title', 'description', 'author', 'file_url',
-            'file_size', 'file_type', 'tags', 'created_at', 'updated_at'
+            'file_size', 'file_type', 'created_at', 'updated_at'
+        ]
+
+class BasicDocumentSerializer(serializers.ModelSerializer):
+    author_name = serializers.CharField(source='author.username', read_only=True)
+
+    class Meta:
+        model = Document
+        fields = [
+            'id', 'title', 'author_name', 'created_at', 'updated_at'
         ]
