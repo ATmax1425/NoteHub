@@ -1,0 +1,203 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}
+Notehub
+{% endblock %}
+
+{% block body %}
+<style>
+    .modal-content{
+        background-image: url("{% static 'background/background-index.jpg' %}");
+        background-size: cover;
+    }
+</style>
+<script>
+    $(document).ready(function() {
+        $('#upload_document_file').on('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+            
+            var csrfToken = $('[name="csrfmiddlewaretoken"]').val();
+            $("#upload-button").prop("disabled", true);
+            $.ajax({
+                url: '{% url "upload-document-file" %}',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {'X-CSRFToken': csrfToken},  // Include CSRF token
+                success: function(response) {
+                    alert('Document uploaded successfully');
+                    $("#document_url").val(response.document_url);
+                    $("#document_type").val(response.document_type);
+                    $("#document_size").val(response.document_size);
+                    $("#finish-button").prop("disabled", false);
+                    $("#upload-button").prop("disabled", false);
+                },
+                error: function(response) {
+                    alert('Error: ' + JSON.stringify(response.responseJSON.error));
+                }
+            });
+        });
+    });
+</script>
+
+<div class="container-fluid">
+    <div class="row" style="padding: 20px;">
+        <div class="col-md-10">
+            <div id="post-div"></div>
+            <div style="text-align:center">
+                <input type="number" id="last-doc-id" value="-1" hidden>
+                <button type="button" class="btn btn-outline-dark" id="load-more-post">Show More</button>
+                <span id="no-more-post" class="btn btn-dark" style="display: none;">No more Articles</span>
+            </div>
+            <script>
+                $(document).ready(function() {
+                    const post_limit = 5;
+                    function load_posts(limit, last_doc_id){
+                        const baseUrl = "{% url 'load-posts' 0 0 %}"
+                        const url = baseUrl.replace('0/0', `${limit}/${last_doc_id}`);
+                        $.ajax({
+                            url: url,
+                            type: 'GET',
+                            success: function(response) {
+                                if(response.success){
+                                    var minId = Number.MAX_SAFE_INTEGER;
+                                    response.data.forEach(element => {
+                                        if(minId > element.id){
+                                            minId = element.id;
+                                        }
+                                        var container = $('<div></div>');
+                                        container.addClass('container bg-light');
+                                        container.css({'padding': '20px', 'border-radius': '10px'});
+
+                                        var row1 = $('<div></div>');
+                                        row1.addClass('row');
+                                        var col11 = $('<div></div>');
+                                        col11.addClass('col-md-6');
+                                        var img = $('<img>');
+                                        var url = customiseUrl(element.author.profile.profile_url, 30);
+                                        img.attr({
+                                            'src': url,
+                                            'alt': 'Profile Image',
+                                            'class': 'profile-image',
+                                        });
+                                        img.css({'border-radius': '50%'});
+                                        col11.append(img);
+                                        var span = $('<span></span>').text(element.author.username);
+                                        span.css({'padding': '5px'});
+                                        col11.append(span);
+
+                                        var col21 = $('<div></div>');
+                                        col21.addClass('col-md-6');
+                                        col21.css({'text-align': 'right'});
+                                        var span = $('<span></span>').text(timeAgo(element.created_at));
+                                        span.css({'padding': '5px'});
+                                        col21.append(span);
+
+                                        row1.append(col11).append(col21);
+
+                                        var row2 = $('<div></div>');
+                                        row2.addClass('row');
+                                        var col21 = $('<div></div>');
+                                        col21.addClass('col-md-12');
+                                        col21.append($('<h3></h3>').text(element.title));
+                                        const processedText = element.description.replace(/#\w[\w-]*/g, function(match) {
+                                            const tag = match.substring(1);
+                                            return `<a href="/tags/${tag}" class="badge bg-primary hash-links">${match}</a>`;
+                                        });
+                                        col21.append($('<pre></pre>').html(processedText));
+
+                                        row2.append(col21);
+
+                                        var row3 = $('<div></div>');
+                                        row3.addClass('row');
+                                        var col31 = $('<div></div>');
+                                        col31.addClass('col-md-3');
+                                        // col31.css({'text-align': 'right'});
+                                        var downloadBox = $('<a></a>').addClass('btn btn-outline-dark').css({'padding':'10px', 'width': "100%"});
+                                        downloadBox.attr({
+                                            'href': convertDriveFileUrl(element.file_url),
+                                            'target': '_blank'
+                                        });
+                                        var downloadIcon = $('<i></i>').addClass('fa fa-download');
+                                        var downloadText = $('<span></span>').text('Download Notes File').css({'padding-left': '5px'});
+                                        var downloadSize = $('<span></span>').text(convertSize(element.file_size)).css({'padding-left': '5px'});
+                                        downloadBox.append(downloadIcon).append(downloadText).append('<br/>').append(downloadSize);
+
+                                        col31.append(downloadBox);
+                                        row3.append(col31);
+
+                                        container.append(row1).append('<br/>').append(row2).append('<br/>').append(row3);
+                                        $('#post-div').append(container);
+                                        $('#post-div').append('<br/>');
+                                    });
+                                    if(minId !== Number.MAX_SAFE_INTEGER){
+                                        $('#last-doc-id').val(minId);
+                                    }
+                                    else{
+                                        $('#load-more-post').hide();
+                                        $('#no-more-post').show();
+                                    }
+                                }
+                            },
+                            error: function(response) {
+                                alert('Error: ' + JSON.stringify(response.responseJSON.error));
+                            }
+                        });
+                    }
+                    load_posts(post_limit, $('#last-doc-id').val());
+                    $('#load-more-post').click(function(){
+                        load_posts(post_limit, $('#last-doc-id').val());
+                    })
+                });
+            </script>
+        </div>
+        <div class="col-md-2">
+            <div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                    <i class="fa fa-upload"></i> New Notes
+                </button>
+                <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="staticBackdropLabel">Upload Notes</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div>
+                                    <form class="form" method="post" enctype="multipart/form-data" id="upload_document_file">
+                                        {% csrf_token %}
+                                        <label for="formFile" class="form-label p-2">Add a file</label>
+                                        <div class="input-group p-2">
+                                            <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="upload-button" aria-label="Upload" name="attached_doc" required>
+                                            <button class="btn btn-outline-dark" type="submit" id="upload-button">Upload</button>
+                                        </div>
+                                    </form>
+                                    <form class="form" method="post" action="{% url 'add-notes' %}" enctype="multipart/form-data" id="add_notes_form">
+                                        {% csrf_token %}
+                                        <input type="text" id="document_url" name="document_url" hidden>
+                                        <input type="text" id="document_type" name="document_type" hidden>
+                                        <input type="number" id="document_size" name="document_size" hidden>
+                                        <div class="form-group p-2">
+                                            <input type="text" class="form-control" placeholder="Title..." name="document_title" required>
+                                        </div>
+                                        <div class="form-group p-2">
+                                            <textarea class="form-control" placeholder="Description..." name="document_desc" rows="8" required></textarea>
+                                        </div>
+                                        <div class="form-group p-2">
+                                            <button class="btn btn-dark" type="submit" id="finish-button" style="width: 100%;" disabled>Post</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

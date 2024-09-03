@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_elasticsearch_dsl',
+    'rest_framework',
     'main',
     'django.contrib.sites',  # Required for django-allauth
     'allauth',
@@ -197,3 +199,18 @@ EMAIL_PORT = EMAIL_CONFIG['EMAIL_PORT']
 EMAIL_USE_TLS = EMAIL_CONFIG['EMAIL_USE_TLS']
 EMAIL_HOST_USER = EMAIL_CONFIG['EMAIL_HOST_USER']
 EMAIL_HOST_PASSWORD = EMAIL_CONFIG['EMAIL_HOST_PASSWORD']
+
+ES_CONFIG_FILE = 'elasticsearch_config.json'
+
+with open(join(BASE_DIR, ES_CONFIG_FILE)) as file:
+    ES_CONFIG = json.load(file)
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': [
+            f"https://{ES_CONFIG['HOST']}:{ES_CONFIG['PORT']}",
+        ],
+        'http_auth': (ES_CONFIG['USER'], ES_CONFIG['PASSWORD']),
+        'verify_certs': ES_CONFIG['VERIFY_CERTS']
+    }
+}

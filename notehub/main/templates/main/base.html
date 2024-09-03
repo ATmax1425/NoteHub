@@ -9,6 +9,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
         <link rel="icon" href="{% static 'logo/logo.png' %}">
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="{% static 'js/scripts.js' %}"></script>
         <title>
             {% block title %}
             {% endblock %}
@@ -19,6 +20,35 @@
                 font-optical-sizing: auto;
                 font-weight: 500;
                 font-style: normal;
+            }
+            .full-height-container {
+                min-height: 100vh;
+                background-image: url('{% static "background/background-index.jpg" %}');
+                background-size: 100% auto;
+                background-repeat: repeat-y;
+                background-position: center top;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .full-height-container .content {
+                position: relative; /* Position content relative to the container */
+                z-index: 1; /* Ensure content appears on top */
+                /* Add any additional styling for your content here */
+            }
+            pre {
+                white-space: pre-wrap; /* Allows text to wrap within the pre tag */
+                word-wrap: break-word; /* Ensures long words break to fit the container */
+                max-width: 100%; /* Optional: limits width to ensure responsiveness */
+                overflow-wrap: anywhere; /* Ensures overflow text wraps */
+                padding: 10px; /* Optional: adds padding for readability */
+                margin: 0; /* Optional: resets margin */
+            }
+            a {
+                text-decoration: none;
+            }
+            .hash-links:hover {
+                color: rgb(255, 255, 255);
             }
         </style>
     </head>
@@ -103,8 +133,14 @@
                 </div>
             </div>
         {% endif %}
-        {% block body %}
-        {% endblock %}
+        <div class="full-height-container">
+            <div class="centered-element">        
+                <br/><br/>
+                {% block body %}
+                {% endblock %}
+                <br/><br/>
+            </div>
+        </div>
         <div class="container-fluid bg-light text-center pt-3">
             <p>Designed and built with all the love in the world by the Pavan Jain</p>
         </div>
