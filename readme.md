@@ -37,9 +37,9 @@ sudo docker run --name notes_repo_elastic --net elastic -p 9200:9200 -d -m 1GB -
 
 add python requirements.txt 
 Django
-pip install elasticsearch-dsl
+pip install elasticsearch-dsl django-elasticsearch-dsl
 pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
-
+pip install djangorestframework
 
 - Run the project once docker container is started : python manage.py runserver
 - Apply all the initial migrations : python manage.py migrate
